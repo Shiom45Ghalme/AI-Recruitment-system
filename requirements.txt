@@ -1,0 +1,29 @@
+# Core dependencies
+phidata==2.7.3
+streamlit==1.40.2
+PyPDF2==3.0.1
+streamlit-pdf-viewer==0.0.19
+requests==2.32.3
+pytz==2023.4
+typing-extensions>=4.9.0
+
+# Optional but recommended
+black>=24.1.1  # for code formatting
+python-dateutil>=2.8.2  # for date parsing
+
+# Additional dependencies
+pandas
+matplotlib
+phi-tools
+
+# Additional dependencies for specific features
+streamlit>=1.29.0
+PyPDF2>=3.0.1
+pandas>=2.1.4
+matplotlib>=3.8.2
+requests>=2.31.0
+pytz>=2023.3
+openai>=1.6.1
+streamlit-pdf-viewer>=0.0.7
+phi-tools>=0.1.0
+python-dotenv>=1.0.0
