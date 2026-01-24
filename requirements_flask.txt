@@ -1,0 +1,29 @@
+# Flask Web Framework
+Flask==3.0.0
+Werkzeug==3.0.1
+
+# PDF Processing
+PyPDF2==3.0.1
+
+# Data Analysis
+pandas==2.3.3
+
+# HTTP Requests
+requests==2.32.3
+
+# Date/Time Handling
+pytz==2023.4
+python-dateutil==2.9.0.post0
+
+# OpenAI for Resume Analysis
+openai==1.6.1
+
+# Email & SMTP (Built-in, no install needed)
+# smtplib (built-in)
+# email (built-in)
+
+# Environment Variables (Optional)
+python-dotenv==1.0.0
+
+# Type Hints
+typing-extensions>=4.9.0

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Interview Slots{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-calendar-alt"></i> Manage Interview Slots</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="fas fa-plus"></i> Add New Slot</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="action" value="add">
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="time" class="form-label">Time</label>
+                        <input type="time" class="form-control" id="time" name="time" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-plus"></i> Add Slot
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5><i class="fas fa-list"></i> Available Slots ({{ slots|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if slots %}
+                    <div class="list-group">
+                        {% for slot in slots %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-calendar"></i>
+                                <strong>{{ slot }}</strong>
+                            </div>
+                            <form method="POST" class="d-inline" 
+                                  onsubmit="return confirm('Are you sure you want to delete this slot?');">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="slot" value="{{ slot }}">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        No slots added yet. Add interview time slots!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

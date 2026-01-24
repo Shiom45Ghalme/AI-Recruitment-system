@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Application Result{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg">
+            {% if passed %}
+            <div class="card-header bg-success text-white text-center">
+                <h3><i class="fas fa-check-circle"></i> Application Successful!</h3>
+            </div>
+            <div class="card-body p-5 text-center">
+                <i class="fas fa-trophy fa-5x text-success mb-4"></i>
+                <h4>Congratulations, {{ name }}!</h4>
+                <p class="lead">Your interview has been successfully scheduled.</p>
+                
+                <div class="alert alert-info text-start my-4">
+                    <h5><i class="fas fa-info-circle"></i> Interview Details:</h5>
+                    <ul>
+                        <li><strong>Role:</strong> {{ role.replace('_', ' ').title() }}</li>
+                        {% if interview_slot %}
+                        <li><strong>Date & Time:</strong> {{ interview_slot }}</li>
+                        {% endif %}
+                        {% if meeting_url %}
+                        <li><strong>Zoom Link:</strong> <a href="{{ meeting_url }}" target="_blank">{{ meeting_url }}</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                <div class="alert alert-success">
+                    <h6><i class="fas fa-envelope"></i> Next Steps:</h6>
+                    <ol class="text-start mb-0">
+                        <li>Check your email for the interview confirmation</li>
+                        <li>Save the Zoom meeting link</li>
+                        <li>Prepare your portfolio and projects</li>
+                        <li>Join the meeting 5 minutes early</li>
+                    </ol>
+                </div>
+                
+                <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg mt-3">
+                    <i class="fas fa-home"></i> Back to Home
+                </a>
+            </div>
+            {% else %}
+            <div class="card-header bg-danger text-white text-center">
+                <h3><i class="fas fa-times-circle"></i> Application Unsuccessful</h3>
+            </div>
+            <div class="card-body p-5 text-center">
+                <i class="fas fa-sad-tear fa-5x text-danger mb-4"></i>
+                <h4>Thank You for Applying, {{ name }}</h4>
+                <p class="lead">Unfortunately, we cannot proceed with your application at this time.</p>
+                
+                <div class="alert alert-warning text-start my-4">
+                    <h5><i class="fas fa-lightbulb"></i> What Went Wrong?</h5>
+                    <ul class="mb-0">
+                        <li>Your resume may not have matched the required skills (needed 50% match)</li>
+                        <li>Or you didn't achieve the passing score on the test (needed 75%)</li>
+                    </ul>
+                </div>
+                
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-envelope"></i> Email Sent:</h6>
+                    <p class="mb-0">We've sent detailed feedback to your email. Please review it and consider applying again in the future after improving your skills.</p>
+                </div>
+                
+                <div class="alert alert-primary text-start">
+                    <h6><i class="fas fa-graduation-cap"></i> Recommendations:</h6>
+                    <ul class="mb-0">
+                        <li>Review the role requirements carefully</li>
+                        <li>Enhance your skills in the required areas</li>
+                        <li>Update your resume with relevant experience</li>
+                        <li>Feel free to apply again after 3 months</li>
+                    </ul>
+                </div>
+                
+                <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg mt-3">
+                    <i class="fas fa-home"></i> Back to Home
+                    </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - AI Recruitment System{% endblock %}
+
+{% block content %}
+<div class="text-center hero-section">
+    <h1 class="display-3 mb-4">
+        <i class="fas fa-robot text-primary"></i> 
+        Welcome to AI Recruitment System
+    </h1>
+    <p class="lead mb-5">Streamline your hiring process with AI-powered resume screening and automated testing</p>
+    
+    <div class="row justify-content-center">
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-lg border-0 h-100">
+                <div class="card-body text-center p-5">
+                    <i class="fas fa-user-tie fa-5x text-primary mb-4"></i>
+                    <h3 class="card-title">For Candidates</h3>
+                    <p class="card-text">Apply for positions, upload your resume, take assessments, and schedule interviews</p>
+                    <a href="{{ url_for('candidate_register') }}" class="btn btn-primary btn-lg mt-3">
+                        <i class="fas fa-sign-in-alt"></i> Apply Now
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-lg border-0 h-100">
+                <div class="card-body text-center p-5">
+                    <i class="fas fa-user-shield fa-5x text-success mb-4"></i>
+                    <h3 class="card-title">For Recruiters</h3>
+                    <p class="card-text">Manage roles, create assessments, review applications, and track analytics</p>
+                    <a href="{{ url_for('recruiter_login') }}" class="btn btn-success btn-lg mt-3">
+                        <i class="fas fa-lock"></i> Recruiter Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="features-section mt-5">
+        <h2 class="mb-4">Key Features</h2>
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <div class="feature-box">
+                    <i class="fas fa-file-pdf fa-3x text-primary mb-3"></i>
+                    <h5>Resume Screening</h5>
+                    <p>AI-powered resume analysis with 50% match threshold</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="feature-box">
+                    <i class="fas fa-clipboard-check fa-3x text-success mb-3"></i>
+                    <h5>MCQ Testing</h5>
+                    <p>Role-specific assessments with 75% passing score</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="feature-box">
+                    <i class="fas fa-calendar-alt fa-3x text-info mb-3"></i>
+                    <h5>Smart Scheduling</h5>
+                    <p>Easy interview slot selection and Zoom integration</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="feature-box">
+                    <i class="fas fa-envelope fa-3x text-warning mb-3"></i>
+                    <h5>Auto Notifications</h5>
+                    <p>Automated emails for selections and interview details</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

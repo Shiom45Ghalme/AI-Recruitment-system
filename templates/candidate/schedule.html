@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Schedule Interview{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg">
+            <div class="card-header bg-success text-white text-center">
+                <h3><i class="fas fa-calendar-check"></i> Schedule Your Interview</h3>
+            </div>
+            <div class="card-body p-5">
+                <div class="alert alert-success">
+                    <h5><i class="fas fa-trophy"></i> Congratulations!</h5>
+                    <p class="mb-0">You've passed the test! Please select a convenient time slot for your interview.</p>
+                </div>
+
+                {% if slots %}
+                <form method="POST">
+                    <div class="mb-4">
+                        <label for="slot" class="form-label">Select Interview Slot *</label>
+                        <select class="form-select" id="slot" name="slot" required>
+                            <option value="">Choose a time slot...</option>
+                            {% for slot in slots %}
+                            <option value="{{ slot }}">{{ slot }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-video"></i> Interview Details:</h6>
+                        <ul class="mb-0">
+                            <li>Interview will be conducted via Zoom</li>
+                            <li>Meeting link will be sent to your email</li>
+                            <li>Please join 5 minutes early</li>
+                            <li>Have your portfolio/projects ready to discuss</li>
+                        </ul>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success btn-lg w-100">
+                        <i class="fas fa-check"></i> Confirm Interview Slot
+                    </button>
+                </form>
+                {% else %}
+                <div class="alert alert-warning">
+                    <h5><i class="fas fa-exclamation-triangle"></i> No Slots Available</h5>
+                    <p class="mb-0">We're sorry, but there are no interview slots available at the moment. Please check back later or contact the recruiter.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
