@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Google Calendar Integration{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fab fa-google text-danger"></i> Google Calendar OAuth 2.0 Integration</h2>
+            <a href="{{ url_for('recruiter_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Status Card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Connection Status</h5>
+            </div>
+            <div class="card-body">
+                {% if token_exists %}
+                    <div class="alert alert-success d-flex align-items-center mb-3">
+                        <i class="fas fa-check-circle fa-2x me-3"></i>
+                        <div>
+                            <h5 class="alert-heading mb-1">Google Calendar Connected & Authorized!</h5>
+                            <p class="mb-0">
+                                OAuth 2.0 tokens are active. When candidates book an interview slot, real Google Calendar events will be scheduled with live <strong>Google Meet</strong> video links automatically.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded border mb-3">
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="fas fa-key text-success me-2"></i> <strong>OAuth 2.0 Status:</strong> Active</li>
+                            <li><i class="fas fa-sync-alt text-primary me-2"></i> <strong>Token Auto-Refresh:</strong> Enabled via refresh token</li>
+                            <li><i class="fas fa-video text-danger me-2"></i> <strong>Meeting Provider:</strong> Google Meet (Hangouts Meet)</li>
+                        </ul>
+                    </div>
+
+                    <form method="POST" onsubmit="return confirm('Disconnect Google Calendar? Future interviews will fall back to simulated links until reconnected.');">
+                        <input type="hidden" name="action" value="disconnect">
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="fas fa-unlink"></i> Disconnect Google Calendar
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="alert alert-warning d-flex align-items-center mb-3">
+                        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                        <div>
+                            <h5 class="alert-heading mb-1">Google Calendar Not Yet Connected</h5>
+                            <p class="mb-0">
+                                Currently operating in fallback mode. Follow the instructions below to enable live Google Calendar scheduling and Google Meet generation.
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if creds_exists %}
+                        <div class="p-3 bg-success-subtle text-success-emphasis border border-success rounded mb-3">
+                            <i class="fas fa-file-code me-2"></i> <strong>credentials.json detected!</strong> Click below to authorize Antigravity Recruitment with your Google account.
+                        </div>
+                        <form method="POST">
+                            <input type="hidden" name="action" value="authorize">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fab fa-google"></i> Authorize Google Calendar Now
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="p-3 bg-light rounded border mb-3">
+                            <span class="text-danger"><i class="fas fa-times-circle me-1"></i> Missing <code>credentials.json</code></span>. Please add your OAuth client file to enable one-click authorization.
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Setup Instructions Card -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-cogs"></i> How to set up Google Calendar OAuth 2.0 (One-time)</h5>
+            </div>
+            <div class="card-body">
+                <ol class="ps-3 mb-0">
+                    <li class="mb-2">
+                        Go to the <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a> and create a project (e.g. <em>AI Recruitment</em>).
+                    </li>
+                    <li class="mb-2">
+                        Go to <strong>APIs & Services</strong> > <strong>Library</strong>, search for <strong>Google Calendar API</strong>, and click <strong>Enable</strong>.
+                    </li>
+                    <li class="mb-2">
+                        Go to <strong>OAuth consent screen</strong>:
+                        <ul>
+                            <li>User type: <strong>External</strong></li>
+                            <li>App name: <strong>AI Recruitment System</strong></li>
+                            <li>Add your email under <strong>Test users</strong> (since the app is in testing mode).</li>
+                        </ul>
+                    </li>
+                    <li class="mb-2">
+                        Go to <strong>Credentials</strong> > <strong>Create Credentials</strong> > <strong>OAuth Client ID</strong>:
+                        <ul>
+                            <li>Application type: <strong>Desktop app</strong> (or Web Application).</li>
+                            <li>Name: <em>Recruiter Calendar Client</em>.</li>
+                        </ul>
+                    </li>
+                    <li class="mb-2">
+                        Click <strong>Download JSON</strong>, rename the downloaded file to <strong><code>credentials.json</code></strong>, and place it inside the <code>Automate_recruitment</code> folder.
+                    </li>
+                    <li>
+                        Return to this page and click <strong>Authorize Google Calendar Now</strong>. A browser popup will open allowing you to sign in and grant calendar access. The system handles all token management and automatic background refreshes from then on!
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

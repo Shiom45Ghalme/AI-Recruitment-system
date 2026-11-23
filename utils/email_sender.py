@@ -49,7 +49,7 @@ Best regards,
 def send_interview_email(sender_email: str, sender_password: str, candidate_email: str, 
                         recruiter_email: str, candidate_name: str, role: str, 
                         interview_slot: str, meeting_url: str, company: str) -> None:
-    """Send interview confirmation email with Zoom link."""
+    """Send interview confirmation email with Google Meet link."""
     subject = f"Interview Scheduled - {role} at {company}"
     body = f"""
 Dear {candidate_name},

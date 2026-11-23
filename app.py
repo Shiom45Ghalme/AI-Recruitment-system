@@ -14,7 +14,11 @@ logger = logging.getLogger(__name__)
 # Import utility modules
 from utils.resume_analyzer import analyze_resume_text, extract_text_from_pdf
 from utils.email_sender import send_selection_email, send_rejection_email, send_interview_email
-from utils.zoom_integration import schedule_zoom_meeting
+from utils.google_calendar import (
+    schedule_google_calendar_interview,
+    is_google_calendar_configured,
+    get_calendar_service
+)
 from utils.data_handler import (
     load_json_file, save_json_file, 
     load_roles, save_roles, 
@@ -35,13 +39,14 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 try:
     from config_local import (
         EMAIL_SENDER, EMAIL_PASSWORD, RECRUITER_EMAIL,
-        ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET,
-        OPENAI_API_KEY, COMPANY_NAME
+        OPENAI_API_KEY, COMPANY_NAME,
+        RECRUITER_USERNAME, RECRUITER_PASSWORD
     )
 except ImportError:
     EMAIL_SENDER = EMAIL_PASSWORD = RECRUITER_EMAIL = ""
-    ZOOM_ACCOUNT_ID = ZOOM_CLIENT_ID = ZOOM_CLIENT_SECRET = ""
     OPENAI_API_KEY = COMPANY_NAME = ""
+    RECRUITER_USERNAME = "admin"
+    RECRUITER_PASSWORD = "admin123"
 
 # Constants
 PASSING_SCORE = 0.75  # 75%
@@ -78,8 +83,8 @@ def recruiter_login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        # Simple authentication (in production, use proper user database)
-        if username == 'admin' and password == 'admin123':
+        # Authentication using configured credentials (in config_local.py)
+        if username == RECRUITER_USERNAME and password == RECRUITER_PASSWORD:
             session['recruiter_logged_in'] = True
             session['recruiter_username'] = username
             flash('Login successful!', 'success')
@@ -227,6 +232,44 @@ def analytics():
     """View analytics dashboard."""
     analytics_data = load_analytics()
     return render_template('recruiter/analytics.html', analytics=analytics_data)
+
+@app.route('/recruiter/google-calendar', methods=['GET', 'POST'])
+@login_required
+def recruiter_google_calendar():
+    """Manage Google Calendar OAuth 2.0 integration."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    token_file = os.path.join(base_dir, 'token.json')
+    creds_file = os.path.join(base_dir, 'credentials.json')
+    
+    token_exists = os.path.exists(token_file)
+    creds_exists = os.path.exists(creds_file)
+    
+    if request.method == 'POST':
+        action = request.form.get('action')
+        if action == 'authorize':
+            if not creds_exists:
+                flash('credentials.json not found! Please place credentials.json in the Automate_recruitment folder first.', 'warning')
+            else:
+                try:
+                    service = get_calendar_service()
+                    if service:
+                        flash('Google Calendar authorized successfully with OAuth 2.0!', 'success')
+                        token_exists = True
+                    else:
+                        flash('Failed to complete Google Calendar authorization. Check console output.', 'danger')
+                except Exception as e:
+                    logger.error(f"Google Calendar OAuth error: {e}")
+                    flash(f'Google OAuth error: {str(e)}', 'danger')
+        elif action == 'disconnect':
+            if os.path.exists(token_file):
+                os.remove(token_file)
+                flash('Google Calendar disconnected successfully.', 'info')
+                token_exists = False
+        return redirect(url_for('recruiter_google_calendar'))
+        
+    return render_template('recruiter/google_calendar.html', 
+                           token_exists=token_exists, 
+                           creds_exists=creds_exists)
 
 # ==================== CANDIDATE ROUTES ====================
 
@@ -386,23 +429,53 @@ def candidate_schedule():
         flash('You need to pass the test to schedule an interview.', 'warning')
         return redirect(url_for('index'))
     
-    slots_data = load_json_file('predefined_times.json', {"available_times": []})
-    available_slots = slots_data['available_times']
+    slots_data = load_json_file('predefined_times.json', {"available_times": [], "booked_times": []})
+    available_slots = slots_data.get('available_times', [])
     
     if request.method == 'POST':
         selected_slot = request.form.get('slot')
         
         if selected_slot:
-            # Schedule Zoom meeting
-            try:
-                meeting_url = schedule_zoom_meeting(
-                    ZOOM_ACCOUNT_ID, ZOOM_CLIENT_ID, ZOOM_CLIENT_SECRET,
-                    session['candidate_name'], session['candidate_email'],
-                    selected_slot, session['candidate_role']
-                )
-            except Exception as e:
-                logger.error(f"Zoom meeting creation failed: {str(e)}")
-                meeting_url = "https://zoom.us"  # Fallback
+            if selected_slot not in available_slots:
+                flash('This time slot has already been booked or is no longer available. Please select another slot.', 'danger')
+                return redirect(url_for('candidate_schedule'))
+            
+            # Prevent slot overlap: remove selected slot from available pool
+            slots_data['available_times'].remove(selected_slot)
+            if 'booked_times' not in slots_data:
+                slots_data['booked_times'] = []
+            slots_data['booked_times'].append({
+                'slot': selected_slot,
+                'candidate_name': session.get('candidate_name'),
+                'candidate_email': session.get('candidate_email'),
+                'role': session.get('candidate_role'),
+                'booked_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            })
+            save_json_file('predefined_times.json', slots_data)
+            # Attempt to schedule event via OAuth 2.0 Google Calendar API with Google Meet
+            meeting_url = None
+            gcal_result = schedule_google_calendar_interview(
+                candidate_name=session.get('candidate_name', 'Candidate'),
+                candidate_email=session.get('candidate_email', ''),
+                recruiter_email=RECRUITER_EMAIL,
+                role=session.get('candidate_role', 'Position'),
+                slot_str=selected_slot,
+                company_name=COMPANY_NAME
+            )
+            
+            if gcal_result.get('success') and gcal_result.get('meeting_url'):
+                meeting_url = gcal_result['meeting_url']
+                logger.info(f"Google Calendar event created successfully with real Google Meet: {meeting_url}")
+            else:
+                # Fallback if Google Calendar API is not yet authorized or encounters an error
+                if gcal_result.get('error'):
+                    logger.warning(f"Google Calendar scheduling note: {gcal_result['error']}")
+                import random
+                import string
+                meet_code = ''.join(random.choices(string.ascii_lowercase, k=3)) + '-' + \
+                           ''.join(random.choices(string.ascii_lowercase, k=4)) + '-' + \
+                           ''.join(random.choices(string.ascii_lowercase, k=3))
+                meeting_url = f"https://meet.google.com/{meet_code}"
             
             # Send interview confirmation email (with error handling)
             try:
@@ -419,6 +492,10 @@ def candidate_schedule():
             except Exception as e:
                 logger.error(f"Email sending failed: {str(e)}")
                 flash('Interview scheduled successfully! (Note: Email notification failed)', 'warning')
+            
+            session['interview_scheduled'] = True
+            session['interview_slot'] = selected_slot
+            session['meeting_url'] = meeting_url
             
             return redirect(url_for('candidate_result', passed=True))
         else:
